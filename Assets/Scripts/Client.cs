@@ -2,22 +2,40 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
-public class Server : MonoBehaviour {
-
+public class Client : MonoBehaviour {
     private const int MAX_CONNECTIONS = 10;
     private int port = 5701;
     private int hostId;
     private int reliableChannel;
     private int unreliableChannel;
 
+    private int connectedId;
+
+    private bool isConnected = false;
     private bool isStarted = false;
+    private float connectionTime;
     private byte error;
 
-
+    private string playerName;
 
     // Use this for initialization
     void Start () {
+		
+	}
+	public void Connect()
+    {
+        string name = GameObject.Find("NameInput").GetComponent<InputField>().text;
+        if (name == "")
+        {
+            Debug.Log("Type in a name, plz");
+            return;
+        }
+        playerName = name;
+
+
+
         NetworkTransport.Init();
         ConnectionConfig cc = new ConnectionConfig();
 
@@ -26,14 +44,17 @@ public class Server : MonoBehaviour {
 
         HostTopology topo = new HostTopology(cc, MAX_CONNECTIONS);
         hostId = NetworkTransport.AddHost(topo, port, null);
+        connectedId = NetworkTransport.Connect(hostId, "LOCALHOST", port, 0, out error);
 
-        isStarted = true;
-	}
+        connectionTime = Time.time;
+        isConnected = true;
+    }
 	
-	private void Update()
+    private void Update()
     {
-        if (!isStarted)
+        if (!isConnected)
             return;
+
 
         int recHostId;
         int connectionId;
@@ -45,10 +66,6 @@ public class Server : MonoBehaviour {
         NetworkEventType recData = NetworkTransport.Receive(out recHostId, out connectionId, out channelId, recBuffer, bufferSize, out dataSize, out error);
         switch (recData)
         {
-            case NetworkEventType.Nothing:         //1
-                break;
-            case NetworkEventType.ConnectEvent:    //2
-                break;
             case NetworkEventType.DataEvent:       //3
                 break;
             case NetworkEventType.DisconnectEvent: //4
