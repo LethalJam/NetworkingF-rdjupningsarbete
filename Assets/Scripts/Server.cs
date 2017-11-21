@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 public class Server : MonoBehaviour {
 
     private const int MAX_CONNECTIONS = 10;
-    private int port = 5701;
+    private int port = 25000;
     private int hostId;
     private int reliableChannel;
     private int unreliableChannel;
